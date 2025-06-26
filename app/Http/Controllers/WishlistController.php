@@ -9,17 +9,19 @@ class WishlistController extends Controller
 {
     public function index()
     {
-        return response()->json(Wishlist::with(['user', 'product'])->get());
+        return Wishlist::with(['product','user'])->get();
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
+        $validated = $request->validate([
             'product_id' => 'required|exists:products,id',
         ]);
 
-        $wishlist = Wishlist::create($request->all());
+        $wishlist = Wishlist::create([
+            'user_id' => auth()->id(),
+            'product_id' => $validated['product_id'],
+        ]);
 
         return response()->json([
             'message' => 'Wishlist item added',
@@ -29,7 +31,7 @@ class WishlistController extends Controller
 
     public function show($id)
     {
-        $wishlist = Wishlist::find($id);
+       $wishlist = Wishlist::with(['product', 'user'])->findOrFail($id);
 
         if (!$wishlist) {
             return response()->json(['message' => 'Wishlist item not found'], 404);
@@ -40,13 +42,13 @@ class WishlistController extends Controller
 
     public function destroy($id)
     {
-        $wishlist = Wishlist::find($id);
-
-        if (!$wishlist) {
-            return response()->json(['message' => 'Wishlist item not found'], 404);
-        }
-
+        $wishlist = Wishlist::findOrFail($id);
+        $productId = $wishlist->product_id;
         $wishlist->delete();
+    
+        if (auth()->id() !== $wishlist->user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
 
         return response()->json(['message' => 'Wishlist item deleted']);
     }

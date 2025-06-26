@@ -9,8 +9,15 @@ class Shipping extends Model
 {
     use HasFactory;
 
-    protected $table = 'shipping';
+    protected $fillable = ['user_id','product_id','name','total','color', 'price'];
 
-    protected $fillable = ['type', 'price'];
+
+    public function user() {
+        return $this->belongsTo(User::class);
+    }
+
+    public function product() {
+        return $this->belongsTo(Product::class);
+    }
 }
 

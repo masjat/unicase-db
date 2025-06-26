@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('review', function (Blueprint $table) {
+        Schema::create('reviews', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id'); // FK
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
@@ -19,8 +19,8 @@ return new class extends Migration
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
         
             // Isi review
-            $table->float('rating',2,1);      // 1 - 5
-            $table->text('comment');
+            $table->float('rating');      // 1 - 5
+            $table->text('review');
             $table->string('color')->nullable();  // warna varian, opsional
             $table->string('image')->nullable();  // path atau URL gambar review
             $table->timestamps();
@@ -32,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('review');
+        Schema::dropIfExists('reviews');
     }
 };

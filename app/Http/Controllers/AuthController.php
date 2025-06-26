@@ -69,4 +69,33 @@ class AuthController extends Controller
             'message' => 'Logout berhasil.',
         ]);
     }
+    //Update
+    public function updateProfile(Request $request)
+{
+    $user = auth()->user();
+
+    $request->validate([
+        'name'           => 'required|string|max:255',
+        'email'          => 'required|string|email|unique:users',
+        'phone_number'   => 'nullable|string|max:20',
+        'gender'         => 'nullable|in:male,female',
+        'date_of_birth'  => 'nullable|date',
+        'image'          => 'nullable|url',
+    ]);
+
+    $user->update([
+        'name'           => $request->name,
+        'email'          => $request->email,
+        'phone_number'   => $request->phone_number,
+        'gender'         => $request->gender,
+        'date_of_birth'  => $request->date_of_birth,
+    ]);
+
+    return response()->json([
+        'status'  => true,
+        'message' => 'Profil berhasil diperbarui',
+        'user'    => $user
+    ]);
+}
+
 }

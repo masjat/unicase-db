@@ -19,7 +19,6 @@ class ProductController extends Controller
             'description' => 'nullable|string',
             'price' => 'required|numeric',
             'image' => 'nullable|url',
-            'rating' => 'nullable|float|min:0|max:5',
             'color' => 'nullable|string',
             'category_id' => 'required|exists:categories,id',
         ]);
@@ -31,17 +30,18 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
-        return $product->load('category');
+        $product = Product::with('category', 'reviews')->findOrFail($id);
+        return response()->json($product);
     }
 
     public function update(Request $request, Product $product)
     {
+        $product = Product::findOrFail($id);       
         $request->validate([
             'name' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
             'price' => 'sometimes|numeric',
             'image' => 'nullable|url',
-            'rating' => 'nullable|numeric|min:0|max:5',
             'color' => 'nullable|string',
             'category_id' => 'sometimes|exists:categories,id',
         ]);
@@ -53,6 +53,7 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
+        $product = Product::findOrFail($id);
         $product->delete();
 
         return response()->json(['message' => 'Product deleted']);

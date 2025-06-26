@@ -8,7 +8,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('payments', function (Blueprint $table) {
-            $table->id('payment_id');
+            $table->id();
             $table->unsignedBigInteger('order_id');
             $table->unsignedBigInteger('id_method');
             $table->dateTime('payment_date')->nullable();
@@ -16,7 +16,6 @@ return new class extends Migration {
             $table->timestamps();
 
             $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
-            $table->foreign('id_method')->references('id')->on('method')->onDelete('cascade');
         });
     }
     public function down(): void

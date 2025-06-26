@@ -11,7 +11,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('custom_cases', function (Blueprint $table) {
-            $table->id('custom_case_id');
+            $table->id();
             $table->unsignedBigInteger('user_id');
             $table->text('image_url')->nullable();
             $table->enum('case_type', ['hardcase', 'softcase', 'premium anti-crack']);

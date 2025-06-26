@@ -25,7 +25,8 @@ class CategoryController extends Controller
 
     public function show(Category $category)
     {
-        return $category;
+         $category = Category::with('products')->findOrFail($id);
+        return response()->json($category);
     }
 
     public function update(Request $request, Category $category)
@@ -41,8 +42,8 @@ class CategoryController extends Controller
 
     public function destroy(Category $category)
     {
+        $category = Category::findOrFail($id);
         $category->delete();
-
         return response()->json(['message' => 'Category deleted']);
     }
 }

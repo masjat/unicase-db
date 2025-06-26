@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\WishlistController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -14,9 +15,11 @@ Route::resource('categories', CategoryController::class);
 Route::get('/products/{productId}/reviews', [ReviewController::class, 'index']);
 Route::post('/ordertracking', [OrderTrackingController::class, 'store']);
 Route::apiResource('status', StatusController::class);
-Route::post('/shipping', [ShippingController::class, 'store']);
-Route::resource('reviews', ReviewController::class);
 
 Route::middleware('auth:sanctum')->group(function () {
-Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::resource('/review', ReviewController::class);
+    Route::resource('/wishlist',WishlistController::class);
+    Route::resource('/shipping', ShippingController::class);
+
 });
