@@ -12,17 +12,16 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('address_id');
-            $table->unsignedBigInteger('id_shipping');
+            $table->unsignedBigInteger('shipping_card_id');
             $table->decimal('service_fee', 10, 2);
             $table->decimal('total_price', 10, 2);
-            $table->unsignedBigInteger('id_status');
+            $table->unsignedBigInteger('status_id');
             $table->timestamps();
 
             // Foreign Keys (optional, aktifkan jika tabel terkait tersedia)
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('address_id')->references('id')->on('addresses')->onDelete('cascade');
-            $table->foreign('id_shipping')->references('id')->on('shippings')->onDelete('cascade');
-            $table->foreign('id_status')->references('id')->on('statuses')->onDelete('cascade');
+            $table->foreign('status_id')->references('id')->on('statuses')->onDelete('cascade');
         });
     }
 

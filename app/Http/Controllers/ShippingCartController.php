@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Shipping;
+use App\Models\ShippingCart;
 use Illuminate\Http\Request;
 
-class ShippingController extends Controller
+class ShippingCardController extends Controller
 {
     public function index()
     {
-         return Shipping::with(['product','user'])->get();
+         return ShippingCart::with(['product','user'])->get();
     }
 
     public function store(Request $request)
@@ -19,21 +19,21 @@ class ShippingController extends Controller
             'total'=> 'required|numberic',
         ]);
 
-        $shipping = Shipping::create([
+        $shippingcart = ShippingCart::create([
             'user_id' => auth()->id(),
             'product_id' => $validated['product_id'],
             'total' =>$validate['total']
         ]);        
         return response()->json([
-            'message' => 'Wishlist item added',
-            'data' => $wishlist,
+            'message' => 'Product item added',
+            'data' => $shippingcart,
         ], 201);    }
 
     public function show($id)
     {
-        $shipping = Shipping::with(['product', 'user'])->findOrFail($id);
+        $shippingcart = ShippingCart::with(['product', 'user'])->findOrFail($id);
 
-        if (!$shipping) {
+        if (!$shippingcart) {
             return response()->json(['message' => 'Shipping item not found'], 404);
         }
 
@@ -41,23 +41,23 @@ class ShippingController extends Controller
 
     public function update(Request $request, $id)
     {
-        $shipping = Shipping::with(['product', 'user'])->findOrFail($id);
+        $shippingcart = ShippingCart::with(['product', 'user'])->findOrFail($id);
         $validate = $request->validate([
             'total' => 'sometimes|numeric',
 
         ]);
-        $shipping->update($validate);
-        if (auth()->id() !== $shipping->user_id) {
+        $shippingcart->update($validate);
+        if (auth()->id() !== $shippingcart->user_id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        return response()->json($shipping);
+        return response()->json($shippingcart);
     }
 
     public function destroy($id)
     {
-        $shipping = Shipping::with(['product', 'user'])->findOrFail($id);
-        $shipping ->delete();
+        $shippingcart = ShippingCart::with(['product', 'user'])->findOrFail($id);
+        $shippingcart ->delete();
         return response()->json(['message' => 'Review deleted']);
     }
 }
