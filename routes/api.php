@@ -22,5 +22,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::resource('/review', ReviewController::class);
     Route::resource('/wishlist',WishlistController::class);
     Route::resource('/shippingcart', ShippingController::class);
+    Route::apiResource('shipping-options', ShippingOptionController::class);
+
 
 });
