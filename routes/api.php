@@ -15,7 +15,7 @@ Route::resource('products', ProductController::class);
 Route::resource('categories', CategoryController::class);
 Route::get('/products/{productId}/reviews', [ReviewController::class, 'index']);
 Route::post('/ordertracking', [OrderTrackingController::class, 'store']);
-Route::apiResource('status', StatusController::class);
+
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -23,6 +23,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('wishlist',WishlistController::class);
     Route::apiResource('shippingcart', ShippingController::class);
     Route::apiResource('shipping-options', ShippingOptionController::class);
+    Route::apiResource('status', StatusController::class);
 
 
 });
