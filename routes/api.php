@@ -19,9 +19,9 @@ Route::apiResource('status', StatusController::class);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::resource('/review', ReviewController::class);
-    Route::resource('/wishlist',WishlistController::class);
-    Route::resource('/shippingcart', ShippingController::class);
+    Route::apiResource('review', ReviewController::class);
+    Route::apiResource('wishlist',WishlistController::class);
+    Route::apiResource('shippingcart', ShippingController::class);
     Route::apiResource('shipping-options', ShippingOptionController::class);
 
 
