@@ -8,6 +8,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\ShippingCartController;
+use App\Http\Controllers\ShippingAddressController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -24,6 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('shippingcart', ShippingController::class);
     Route::apiResource('shipping-options', ShippingOptionController::class);
     Route::apiResource('status', StatusController::class);
+    Route::apiResource('shipping-addresses', ShippingAddressController::class);
 
 
 });

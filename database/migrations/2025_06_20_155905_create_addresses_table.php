@@ -11,17 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('addresses', function (Blueprint $table) {
+        Schema::create('shipping_addresses', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->string('recipient', 80);
-            $table->string('phone', 20);
-            $table->string('label', 50)->nullable();
-            $table->string('province', 80);
-            $table->string('city', 80);
-            $table->string('postal_code', 20);
+            $table->string('receivers_name');
+            $table->string('phone_number');
+            $table->string('address_label')->nullable();
+            $table->string('city');
+            $table->string('district');
+            $table->string('postal_code');
             $table->text('full_address');
-            $table->text('note')->nullable();
+            $table->text('note_to_courier')->nullable();
             $table->timestamps();
 
             // Relasi ke tabel users
@@ -35,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('addresses');
+        Schema::dropIfExists('shipping_addresses');
     }
 };

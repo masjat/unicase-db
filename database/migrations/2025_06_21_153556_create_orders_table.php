@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('address_id');
+            $table->unsignedBigInteger('shipping_address_id');
             $table->unsignedBigInteger('shipping_card_id');
             $table->decimal('service_fee', 10, 2);
             $table->decimal('total_price', 10, 2);
@@ -20,7 +20,7 @@ return new class extends Migration
 
             // Foreign Keys (optional, aktifkan jika tabel terkait tersedia)
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('address_id')->references('id')->on('addresses')->onDelete('cascade');
+            $table->foreign('shipping_address_id')->references('id')->on('shipping_addresses')->onDelete('cascade');
             $table->foreign('status_id')->references('id')->on('statuses')->onDelete('cascade');
         });
     }
