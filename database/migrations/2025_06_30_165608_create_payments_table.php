@@ -9,13 +9,13 @@ return new class extends Migration {
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('order_id');
+            $table->unsignedBigInteger('id_checkout');
             $table->unsignedBigInteger('id_method');
             $table->dateTime('payment_date')->nullable();
             $table->decimal('total_payment', 10, 2)->default(0);
             $table->timestamps();
 
-            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
+            $table->foreign('id_checkout')->references('id')->on('checkouts')->onDelete('cascade');
         });
     }
     public function down(): void

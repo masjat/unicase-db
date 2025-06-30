@@ -9,7 +9,7 @@ class ShippingCart extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id','product_id','name','total','color', 'price'];
+    protected $fillable = ['user_id','product_id','name','quantity','color', 'price'];
 
 
     public function user() {

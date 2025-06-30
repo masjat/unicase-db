@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('order_details', function (Blueprint $table) {
             $table->id('order_detail_id');
-            $table->unsignedBigInteger('order_id');
+            $table->unsignedBigInteger('id_checkout');
             $table->unsignedBigInteger('product_id');
             $table->unsignedBigInteger('custom_case_id')->nullable(); // bisa nullable jika opsional
             $table->string('variant', 50);
@@ -19,7 +19,7 @@ return new class extends Migration
             $table->timestamps();
 
             // Foreign key (optional tergantung relasi tabelmu)
-            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
+            $table->foreign('id_checkout')->references('id')->on('checkouts')->onDelete('cascade');
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
             $table->foreign('custom_case_id')->references('id')->on('custom_cases')->onDelete('set null');
         });

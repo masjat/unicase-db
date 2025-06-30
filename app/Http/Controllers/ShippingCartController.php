@@ -4,60 +4,73 @@ namespace App\Http\Controllers;
 
 use App\Models\ShippingCart;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
-class ShippingCardController extends Controller
+class ShippingCartController extends Controller
 {
     public function index()
     {
-         return ShippingCart::with(['product','user'])->get();
+        $items = ShippingCart::with('product')->where('user_id', Auth::id())->get();
+        return response()->json($items);
     }
 
     public function store(Request $request)
     {
-        $validate = $request->validate([
+        $validated = $request->validate([
             'product_id' => 'required|exists:products,id',
-            'total'=> 'required|numberic',
+            'quantity'   => 'required|integer|min:1',
+            'price'      => 'required|numeric',
+            'color'      => 'nullable|string',
         ]);
 
         $shippingcart = ShippingCart::create([
-            'user_id' => auth()->id(),
+            'user_id'    => auth()->id(),
             'product_id' => $validated['product_id'],
-            'total' =>$validate['total']
-        ]);        
+            'quantity'   => $validated['quantity'],
+            'price'      => $validated['price'],
+            'color'      => $validated['color'] ?? null,
+        ]);
+
         return response()->json([
             'message' => 'Product item added',
             'data' => $shippingcart,
-        ], 201);    }
+        ], 201);
+    }
 
     public function show($id)
     {
-        $shippingcart = ShippingCart::with(['product', 'user'])->findOrFail($id);
+        $shippingcart = ShippingCart::with(['product'])->find($id);
 
-        if (!$shippingcart) {
-            return response()->json(['message' => 'Shipping item not found'], 404);
-        }
-
-        return response()->json($wishlist);    }
-
-    public function update(Request $request, $id)
-    {
-        $shippingcart = ShippingCart::with(['product', 'user'])->findOrFail($id);
-        $validate = $request->validate([
-            'total' => 'sometimes|numeric',
-
-        ]);
-        $shippingcart->update($validate);
-        if (auth()->id() !== $shippingcart->user_id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+        if (! $shippingcart || $shippingcart->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Shipping item not found or unauthorized'], 404);
         }
 
         return response()->json($shippingcart);
     }
 
+    public function update(Request $request, $id)
+    {
+        $shippingcart = ShippingCart::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+
+        $validated = $request->validate([
+            'quantity' => 'sometimes|integer|min:1',
+            'price'    => 'sometimes|numeric',
+            'color'    => 'nullable|string',
+        ]);
+
+        $shippingcart->update($validated);
+
+        return response()->json([
+            'message' => 'Cart item updated',
+            'data' => $shippingcart
+        ]);
+    }
+
     public function destroy($id)
     {
-        $shippingcart = ShippingCart::with(['product', 'user'])->findOrFail($id);
-        $shippingcart ->delete();
-        return response()->json(['message' => 'Review deleted']);
+        $item = ShippingCart::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+        $item->delete();
+
+        return response()->json(['message' => 'Item dihapus']);
     }
 }

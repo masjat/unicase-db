@@ -10,11 +10,11 @@ class CreateOrderTrackingTable extends Migration
     {
         Schema::create('order_tracking', function (Blueprint $table) {
             $table->id('tracking_id');
-            $table->unsignedBigInteger('order_id');
+            $table->unsignedBigInteger('id_checkout');
             $table->string('status', 80);
             $table->timestamps();
 
-            $table->foreign('order_id')->references('id')->on('orders')->onDelete('cascade');
+            $table->foreign('id_checkout')->references('id')->on('checkouts')->onDelete('cascade');
         });
     }
 
