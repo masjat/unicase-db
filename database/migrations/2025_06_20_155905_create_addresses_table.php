@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('phone_number');
             $table->string('address_label')->nullable();
             $table->string('city');
-            $table->string('district');
             $table->string('postal_code');
             $table->text('full_address');
             $table->text('note_to_courier')->nullable();

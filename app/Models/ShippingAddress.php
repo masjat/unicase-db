@@ -12,7 +12,6 @@ class ShippingAddress extends Model
         'phone_number',
         'address_label',
         'city',
-        'district',
         'postal_code',
         'full_address',
         'note_to_courier'
