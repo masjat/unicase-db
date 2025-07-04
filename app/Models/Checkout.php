@@ -43,4 +43,8 @@ class Checkout extends Model
     {
         return $this->hasMany(CheckoutItem::class);
     }
+    public function payment()
+    {
+         return $this->hasOne(Payment::class); 
+    }
 }

@@ -7,24 +7,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Payment extends Model
 {
-    use HasFactory;
-
-    protected $primaryKey = 'payment_id';
-
     protected $fillable = [
-        'order_id',
-        'id_method',
-        'payment_date',
-        'total_payment',
+        'user_id', 'checkout_id', 'payment_method_id',
+        'order_id', 'payment_type', 'bank', 'va_number',
+        'amount', 'status', 'expired_at'
     ];
 
-    public function order()
-    {
-        return $this->belongsTo(Order::class, 'order_id', 'order_id');
-    }
-
-    public function method()
-    {
-        return $this->belongsTo(Method::class, 'id_method', 'id_method');
-    }
+    public function user() { return $this->belongsTo(User::class); }
+    public function checkout() { return $this->belongsTo(Checkout::class); }
+    public function method() { return $this->belongsTo(PaymentMethod::class, 'payment_method_id'); }
 }
+

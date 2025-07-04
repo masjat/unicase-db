@@ -16,9 +16,9 @@ return new class extends Migration {
             $table->unsignedBigInteger('shipping_option_id');
 
             $table->decimal('total_product_price', 10, 2);
-            $table->decimal('total_shipping_cost', 10, 2);
-            $table->decimal('service_fee', 10, 2)->default(1000);
-            $table->decimal('application_fee', 10, 2)->default(1000);
+            $table->decimal('total_shipping_cost', 10, 2)->default(0);
+            $table->decimal('service_fee', 10, 2)->default(0);
+            $table->decimal('application_fee', 10, 2)->default(0);
             $table->decimal('total_purchase', 10, 2);
 
             $table->string('status')->default('pending');
