@@ -6,15 +6,17 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
     // REGISTER
     public function register(Request $request)
-    {
+{
+    try {
         $validated = $request->validate([
             'name'     => 'required|string|max:255',
-            'email'    => 'required|string|email|unique:users',
+            'email'    => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
         ]);
 
@@ -32,8 +34,14 @@ class AuthController extends Controller
             'user'   => $user,
             'token'  => $token,
         ]);
+    } catch (ValidationException $e) {
+        return response()->json([
+            'status'  => false,
+            'message' => 'Validasi gagal',
+            'errors'  => $e->errors(),
+        ], 422);
     }
-
+}
     // LOGIN
     public function login(Request $request)
     {

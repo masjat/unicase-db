@@ -4,73 +4,92 @@ namespace App\Http\Controllers;
 
 use App\Models\ShippingCart;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class ShippingCartController extends Controller
 {
-    public function index()
+    // 🧾 Lihat isi keranjang user
+    public function index(Request $request)
     {
-        $items = ShippingCart::with('product')->where('user_id', Auth::id())->get();
-        return response()->json($items);
+        $cartItems = ShippingCart::with('product')
+            ->where('user_id', $request->user()->id)
+            ->get();
+
+        $totalPrice = $cartItems->sum(function ($item) {
+            return $item->product->price * $item->quantity;
+        });
+
+        return response()->json([
+            'status' => true,
+            'cart_items' => $cartItems,
+            'total_price' => $totalPrice
+        ]);
     }
 
+    // ➕ Tambahkan ke keranjang (atau tambah quantity jika sudah ada)
     public function store(Request $request)
     {
         $validated = $request->validate([
             'product_id' => 'required|exists:products,id',
-            'quantity'   => 'required|integer|min:1',
-            'price'      => 'required|numeric',
-            'color'      => 'nullable|string',
+            'quantity' => 'required|integer|min:1'
         ]);
 
-        $shippingcart = ShippingCart::create([
-            'user_id'    => auth()->id(),
-            'product_id' => $validated['product_id'],
-            'quantity'   => $validated['quantity'],
-            'price'      => $validated['price'],
-            'color'      => $validated['color'] ?? null,
-        ]);
+        $cartItem = ShippingCart::where('user_id', $request->user()->id)
+            ->where('product_id', $validated['product_id'])
+            ->first();
 
-        return response()->json([
-            'message' => 'Product item added',
-            'data' => $shippingcart,
-        ], 201);
-    }
-
-    public function show($id)
-    {
-        $shippingcart = ShippingCart::with(['product'])->find($id);
-
-        if (! $shippingcart || $shippingcart->user_id !== Auth::id()) {
-            return response()->json(['message' => 'Shipping item not found or unauthorized'], 404);
+        if ($cartItem) {
+            $cartItem->update([
+                'quantity' => $cartItem->quantity + $validated['quantity']
+            ]);
+        } else {
+            $cartItem = ShippingCart::create([
+                'user_id' => $request->user()->id,
+                'product_id' => $validated['product_id'],
+                'quantity' => $validated['quantity'],
+            ]);
         }
 
-        return response()->json($shippingcart);
+        return response()->json([
+            'status' => true,
+            'message' => 'Produk berhasil ditambahkan ke keranjang',
+            'cart_item' => $cartItem
+        ]);
     }
 
+    // ✏️ Ubah jumlah quantity produk
     public function update(Request $request, $id)
     {
-        $shippingcart = ShippingCart::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
-
         $validated = $request->validate([
-            'quantity' => 'sometimes|integer|min:1',
-            'price'    => 'sometimes|numeric',
-            'color'    => 'nullable|string',
+            'quantity' => 'required|integer|min:1'
         ]);
 
-        $shippingcart->update($validated);
+        $cartItem = ShippingCart::where('id', $id)
+            ->where('user_id', $request->user()->id)
+            ->firstOrFail();
+
+        $cartItem->update([
+            'quantity' => $validated['quantity']
+        ]);
 
         return response()->json([
-            'message' => 'Cart item updated',
-            'data' => $shippingcart
+            'status' => true,
+            'message' => 'Jumlah produk berhasil diperbarui',
+            'cart_item' => $cartItem
         ]);
     }
 
-    public function destroy($id)
+    // ❌ Hapus produk dari keranjang
+    public function destroy(Request $request, $id)
     {
-        $item = ShippingCart::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
-        $item->delete();
+        $cartItem = ShippingCart::where('id', $id)
+            ->where('user_id', $request->user()->id)
+            ->firstOrFail();
 
-        return response()->json(['message' => 'Item dihapus']);
+        $cartItem->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Produk berhasil dihapus dari keranjang'
+        ]);
     }
 }
