@@ -12,12 +12,11 @@ use App\Http\Controllers\ShippingAddressController;
 use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ShippingOptionController;
+use App\Http\Middleware\IsAdmin;
 
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::resource('products', ProductController::class);
-Route::resource('categories', CategoryController::class);
 Route::get('/products/{productId}/reviews', [ReviewController::class, 'index']);
 Route::post('/ordertracking', [OrderTrackingController::class, 'store']);
 Route::get('/payment-methods', [PaymentMethodController::class, 'index']);
@@ -38,3 +37,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 });
+
+Route::middleware(['auth:sanctum', IsAdmin::class])->group(function () {
+    Route::resource('products', ProductController::class);
+    Route::resource('categories', CategoryController::class);
+
+});
+
