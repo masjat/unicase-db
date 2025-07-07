@@ -17,6 +17,8 @@ use App\Http\Middleware\IsAdmin;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/products', [ProductController::class, 'index']);
+Route::get('/products/{id}', [ProductController::class, 'show']);
 Route::get('/products/{productId}/reviews', [ReviewController::class, 'index']);
 Route::post('/ordertracking', [OrderTrackingController::class, 'store']);
 Route::get('/payment-methods', [PaymentMethodController::class, 'index']);
@@ -40,7 +42,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::middleware(['auth:sanctum', IsAdmin::class])->group(function () {
-    Route::resource('products', ProductController::class);
+    Route::resource('products', ProductController::class)->except(['index', 'show']);
     Route::resource('categories', CategoryController::class);
 
 });

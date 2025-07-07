@@ -28,28 +28,31 @@ class ProductController extends Controller
         return response()->json($product, 201);
     }
 
-    public function show(Product $product)
-    {
-        $product = Product::with('category', 'reviews')->findOrFail($id);
-        return response()->json($product);
-    }
+    // show
+public function show($id)
+{
+    $product = Product::with('category', 'reviews')->findOrFail($id);
+    return response()->json($product);
+}
 
-    public function update(Request $request, Product $product)
-    {
-        $product = Product::findOrFail($id);       
-        $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'sometimes|numeric',
-            'image' => 'nullable|url',
-            'color' => 'nullable|string',
-            'category_id' => 'sometimes|exists:categories,id',
-        ]);
+    // update
+public function update(Request $request, $id)
+{
+    $product = Product::findOrFail($id);       
+    $request->validate([
+        'name' => 'sometimes|string|max:255',
+        'description' => 'nullable|string',
+        'price' => 'sometimes|numeric',
+        'image' => 'nullable|url',
+        'color' => 'nullable|string',
+        'category_id' => 'sometimes|exists:categories,id',
+    ]);
 
-        $product->update($request->all());
+    $product->update($request->all());
 
-        return response()->json($product);
-    }
+    return response()->json($product);
+}
+
 
     public function destroy(Product $product)
     {
