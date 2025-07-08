@@ -20,8 +20,7 @@ return new class extends Migration
         
             // Isi review
             $table->float('rating');      // 1 - 5
-            $table->text('review');
-            $table->string('color')->nullable();  // warna varian, opsional
+            $table->text('review')->nullable();
             $table->string('image')->nullable();  // path atau URL gambar review
             $table->timestamps();
         });
