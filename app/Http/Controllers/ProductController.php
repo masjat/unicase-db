@@ -21,6 +21,7 @@ class ProductController extends Controller
             'image' => 'nullable|url',
             'color' => 'nullable|string',
             'category_id' => 'required|exists:categories,id',
+            'weight' => 'required|integer',
         ]);
 
         $product = Product::create($request->all());
@@ -46,6 +47,7 @@ public function update(Request $request, $id)
         'image' => 'nullable|url',
         'color' => 'nullable|string',
         'category_id' => 'sometimes|exists:categories,id',
+        'weight' => 'sometimes|integer',
     ]);
 
     $product->update($request->all());

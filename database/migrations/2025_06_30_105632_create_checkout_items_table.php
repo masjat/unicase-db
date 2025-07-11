@@ -8,21 +8,14 @@ return new class extends Migration {
     {
         Schema::create('checkout_items', function (Blueprint $table) {
             $table->id();
-
-            // Manual foreign keys
-            $table->unsignedBigInteger('checkout_id');
-            $table->unsignedBigInteger('product_id');
-
+            $table->foreignId('checkout_id')->constrained()->onDelete('cascade');
+            $table->foreignId('product_id')->constrained()->onDelete('cascade');
+            $table->string('product_name');
+            $table->decimal('product_price', 12, 2);
+            $table->integer('weight'); // gram
             $table->integer('quantity');
-            $table->decimal('price', 10, 2);
-            $table->decimal('total', 10, 2);
-
             $table->timestamps();
-
-            // Foreign constraints
-            $table->foreign('checkout_id')->references('id')->on('checkouts')->onDelete('cascade');
-            $table->foreign('product_id')->references('id')->on('products')->onDelete('restrict');
-        });
+        });        
     }
 
     public function down(): void

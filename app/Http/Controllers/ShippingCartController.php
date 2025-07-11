@@ -7,16 +7,13 @@ use Illuminate\Http\Request;
 
 class ShippingCartController extends Controller
 {
-    // 🧾 Lihat isi keranjang user
     public function index(Request $request)
     {
         $cartItems = ShippingCart::with('product')
             ->where('user_id', $request->user()->id)
             ->get();
 
-        $totalPrice = $cartItems->sum(function ($item) {
-            return $item->product->price * $item->quantity;
-        });
+        $totalPrice = $cartItems->sum(fn($item) => $item->product->price * $item->quantity);
 
         return response()->json([
             'status' => true,
@@ -25,7 +22,6 @@ class ShippingCartController extends Controller
         ]);
     }
 
-    // ➕ Tambahkan ke keranjang (atau tambah quantity jika sudah ada)
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -38,9 +34,7 @@ class ShippingCartController extends Controller
             ->first();
 
         if ($cartItem) {
-            $cartItem->update([
-                'quantity' => $cartItem->quantity + $validated['quantity']
-            ]);
+            $cartItem->update(['quantity' => $cartItem->quantity + $validated['quantity']]);
         } else {
             $cartItem = ShippingCart::create([
                 'user_id' => $request->user()->id,
@@ -56,7 +50,6 @@ class ShippingCartController extends Controller
         ]);
     }
 
-    // ✏️ Ubah jumlah quantity produk
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
@@ -67,9 +60,7 @@ class ShippingCartController extends Controller
             ->where('user_id', $request->user()->id)
             ->firstOrFail();
 
-        $cartItem->update([
-            'quantity' => $validated['quantity']
-        ]);
+        $cartItem->update(['quantity' => $validated['quantity']]);
 
         return response()->json([
             'status' => true,
@@ -78,7 +69,6 @@ class ShippingCartController extends Controller
         ]);
     }
 
-    // ❌ Hapus produk dari keranjang
     public function destroy(Request $request, $id)
     {
         $cartItem = ShippingCart::where('id', $id)

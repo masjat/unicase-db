@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class CheckoutItem extends Model
 {
     protected $fillable = [
-        'checkout_id', 'product_id', 'quantity', 'price', 'total'
+        'checkout_id', 'product_id', 'product_name', 'product_price', 'weight', 'quantity'
     ];
 
     public function product()

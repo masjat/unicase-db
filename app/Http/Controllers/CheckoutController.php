@@ -4,59 +4,133 @@ namespace App\Http\Controllers;
 
 use App\Models\Checkout;
 use App\Models\CheckoutItem;
+use App\Models\ShippingCart;
+use App\Models\ShippingAddress;
+use App\Models\PaymentMethod;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
+
 
 class CheckoutController extends Controller
 {
     public function store(Request $request)
-{
-    $request->validate([
-        'shipping_address_id' => 'required|exists:shipping_addresses,id',
-        'payment_method_id' => 'required|exists:payment_methods,id',
-        'shipping_option_id' => 'required|exists:shipping_options,id',
-    ]);
+    {
+        $validated = $request->validate([
+            'cart_ids' => 'required|array',
+            'cart_ids.*' => 'exists:shipping_carts,id',
+            'shipping_address_id' => 'required|exists:shipping_addresses,id',
+            'payment_method_id' => 'required|exists:payment_methods,id',
+            'courier' => 'required|string',
+            'courier_service' => 'required|string',
+        ]);
 
-    $user = Auth::user();
-    $carts = \App\Models\ShippingCart::where('user_id', $user->id)->get();
+        $user = auth()->user();
 
-    if ($carts->isEmpty()) {
-        return response()->json(['message' => 'Keranjang kosong'], 400);
-    }
+        $cartItems = ShippingCart::with('product')
+            ->where('user_id', $user->id)
+            ->whereIn('id', $validated['cart_ids'])
+            ->get();
 
-    $totalProductPrice = $carts->sum(fn($item) => $item->price * $item->quantity);
-    $shippingCost = 10000;
-    $serviceFee = 2000;
-    $applicationFee = 1000;
+        $totalWeight = $cartItems->sum(fn($item) => $item->product->weight * $item->quantity);
+        $subtotal = $cartItems->sum(fn($item) => $item->product->price * $item->quantity);
 
-    $checkout = Checkout::create([
-        'user_id' => $user->id,
-        'shipping_address_id' => $request->shipping_address_id,
-        'payment_method_id' => $request->payment_method_id,
-        'shipping_option_id' => $request->shipping_option_id,
-        'total_product_price' => $totalProductPrice,
-        'total_shipping_cost' => $shippingCost,
-        'service_fee' => $serviceFee,
-        'application_fee' => $applicationFee,
-        'total_purchase' => $totalProductPrice + $shippingCost + $serviceFee + $applicationFee,
-        'status' => 'pending'
-    ]);
+        $address = ShippingAddress::findOrFail($validated['shipping_address_id']);
+        $destinationDistrictId = $address->district_id;
+        $shippingCost = $this->getShippingCostFromRajaOngkir(
+            $destinationDistrictId,
+            $totalWeight,
+            $validated['courier'],
+            $validated['courier_service']
+        );
 
-    foreach ($carts as $item) {
-        CheckoutItem::create([
-            'checkout_id' => $checkout->id,
-            'product_id' => $item->product_id,
-            'quantity' => $item->quantity,
-            'price' => $item->price,
-            'total' => $item->price * $item->quantity,
+        $checkout = Checkout::create([
+            'user_id' => $user->id,
+            'shipping_address_id' => $validated['shipping_address_id'],
+            'payment_method_id' => $validated['payment_method_id'],
+            'courier' => $validated['courier'],
+            'courier_service' => $validated['courier_service'],
+            'shipping_cost' => $shippingCost,
+            'subtotal' => $subtotal,
+            'total' => $subtotal + $shippingCost,
+            'status' => 'pending'
+        ]);
+
+        foreach ($cartItems as $item) {
+            CheckoutItem::create([
+                'checkout_id' => $checkout->id,
+                'product_id' => $item->product_id,
+                'product_name' => $item->product->name,
+                'product_price' => $item->product->price,
+                'weight' => $item->product->weight,
+                'quantity' => $item->quantity,
+            ]);
+        }
+
+        ShippingCart::whereIn('id', $validated['cart_ids'])->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Checkout berhasil',
+            'checkout' => $checkout
         ]);
     }
 
-    \App\Models\ShippingCart::where('user_id', $user->id)->delete();
-
-    return response()->json([
-        'message' => 'Checkout berhasil',
-        'data' => $checkout->load('items')
-    ]);
-}
+    private function getShippingCostFromRajaOngkir(
+        string $destinationDistrictId,
+        int    $weight,
+        string $courier,
+        string $service
+    ): int {
+        $originDistrictId = env('RAJAONGKIR_ORIGIN_DISTRICT_ID');
+        $apiKey = env('RAJAONGKIR_API_KEY');
+    
+        $payload = [
+            'origin'      => $originDistrictId,
+            'destination' => $destinationDistrictId,
+            'weight'      => $weight,
+            'courier'     => $courier,
+            'price'       => 'lowest'
+        ];
+    
+        \Log::info('Guzzle Payload Debug', $payload); // ✅ log isi payload dulu
+    
+        try {
+            $client = new Client();
+    
+            $response = $client->post('https://rajaongkir.komerce.id/api/v1/calculate/district/domestic-cost', [
+                'form_params' => $payload,
+                'headers' => [
+                    'accept' => 'application/json',
+                    'key'    => $apiKey
+                ],
+                'http_errors' => false,
+            ]);
+    
+            $status = $response->getStatusCode();
+            $body = json_decode($response->getBody()->getContents(), true);
+    
+            if ($status === 200 && isset($body['data'])) {
+                foreach ($body['data'] as $svc) {
+                    if (strtolower($svc['service']) === strtolower($service)) {
+                        return (int) $svc['cost'];
+                    }
+                }
+            }
+    
+            \Log::warning('Gagal hitung ongkir:', [
+                'status' => $status,
+                'body'   => $body,
+            ]);
+    
+        } catch (RequestException $e) {
+            \Log::error('Guzzle Error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
+    
+        return 0;
+    }  
 }

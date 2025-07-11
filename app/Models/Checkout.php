@@ -7,16 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Checkout extends Model
 {
     protected $fillable = [
-        'user_id',
-        'shipping_address_id',
-        'payment_method_id',
-        'shipping_option_id',
-        'total_product_price',
-        'total_shipping_cost',
-        'service_fee',
-        'application_fee',
-        'total_purchase',
-        'status'
+        'user_id', 'shipping_address_id', 'payment_method_id',
+        'courier', 'courier_service', 'shipping_cost',
+        'subtotal', 'total', 'status'
     ];
 
     public function user()
@@ -33,12 +26,6 @@ class Checkout extends Model
     {
         return $this->belongsTo(PaymentMethod::class);
     }
-
-    public function shippingOption()
-    {
-        return $this->belongsTo(ShippingOption::class);
-    }
-
     public function items()
     {
         return $this->hasMany(CheckoutItem::class);

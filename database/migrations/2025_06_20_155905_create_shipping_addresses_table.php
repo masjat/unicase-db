@@ -13,18 +13,22 @@ return new class extends Migration
     {
         Schema::create('shipping_addresses', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('receivers_name');
             $table->string('phone_number');
-            $table->string('address_label')->nullable();
+
+            $table->unsignedInteger('province_id'); // dari RajaOngkir
+            $table->string('province_name');
+            $table->unsignedInteger('city_id');  // dari RajaOngkir
             $table->string('city');
+
             $table->string('postal_code');
             $table->text('full_address');
             $table->text('note_to_courier')->nullable();
+
+            $table->boolean('is_primary')->default(false);
             $table->timestamps();
 
-            // Relasi ke tabel users
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 
         });
     }

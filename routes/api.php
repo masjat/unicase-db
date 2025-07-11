@@ -13,6 +13,13 @@ use App\Http\Controllers\PaymentMethodController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ShippingOptionController;
 use App\Http\Middleware\IsAdmin;
+use App\Http\Controllers\ProductImageController;
+use App\Http\Controllers\RajaOngkirController;
+
+Route::get('/rajaongkir/provinces', [RajaOngkirController::class, 'provinces']);
+Route::get('/rajaongkir/cities', [RajaOngkirController::class, 'cities']); // ?province_id=5
+Route::post('/rajaongkir/services', [RajaOngkirController::class, 'courierServices']);
+
 
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -21,9 +28,8 @@ Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{id}', [ProductController::class, 'show']);
 Route::get('/products/{productId}/reviews', [ReviewController::class, 'index']);
 Route::post('/ordertracking', [OrderTrackingController::class, 'store']);
-Route::get('/payment-methods', [PaymentMethodController::class, 'index']);
-Route::post('/payment-methods', [PaymentMethodController::class, 'store']);
 Route::apiResource('shipping-options', ShippingOptionController::class);
+
 
 
 
@@ -48,6 +54,7 @@ Route::middleware(['auth:sanctum', IsAdmin::class])->group(function () {
     Route::get('/products/{productId}/images', [ProductImageController::class, 'index']);
     Route::post('/product-images', [ProductImageController::class, 'store']);
     Route::delete('/product-images/{id}', [ProductImageController::class, 'destroy']);
+    Route::apiResource('payment-methods', PaymentMethodController::class);
 
 });
 

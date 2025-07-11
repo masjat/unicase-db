@@ -6,7 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class PaymentMethod extends Model
 {
-    protected $fillable = ['name', 'type'];
+      protected $fillable = [
+        'name',
+        'account_number',
+        'account_name',
+        'bank_logo',
+        'type',
+        'is_active',
+    ];
 
     public function checkouts()
     {

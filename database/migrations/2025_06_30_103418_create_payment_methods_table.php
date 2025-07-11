@@ -13,8 +13,12 @@ return new class extends Migration
     {
         Schema::create('payment_methods', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // e.g., BCA, BRI, etc.
-            $table->string('type')->default('Virtual Account'); // e.g., Virtual Account, E-Wallet, etc.
+            $table->string('name'); // Contoh: BCA, BRI, Mandiri
+            $table->string('account_number'); // Nomor rekening
+            $table->string('account_name');   // Nama pemilik rekening
+            $table->string('bank_logo')->nullable(); // URL logo bank (optional)
+            $table->boolean('is_active')->default(true);
+            $table->enum('type', ['transfer'])->default('transfer'); // Hanya transfer
             $table->timestamps();
         });
     }
