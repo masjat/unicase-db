@@ -16,6 +16,9 @@ use App\Http\Middleware\IsAdmin;
 use App\Http\Controllers\ProductImageController;
 use App\Http\Controllers\RajaOngkirController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\CustomCaseController;
+use App\Http\Controllers\BrandController;
+use App\Http\Controllers\BrandTypeController;
 
 Route::get('/rajaongkir/provinces', [RajaOngkirController::class, 'provinces']);
 Route::get('/rajaongkir/cities', [RajaOngkirController::class, 'cities']); // ?province_id=5
@@ -53,6 +56,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/payments', [PaymentController::class, 'store']);
     Route::put('/payments/{id}', [PaymentController::class, 'update']);
     Route::delete('/payments/{id}', [PaymentController::class, 'destroy']);
+    Route::apiResource('custom-cases', CustomCaseController::class);
 
 
 });
@@ -66,6 +70,8 @@ Route::middleware(['auth:sanctum', IsAdmin::class])->group(function () {
     Route::apiResource('payment-methods', PaymentMethodController::class);
     Route::get('/payments', [PaymentController::class, 'index']);
     Route::put('/payments/{id}/confirm', [PaymentController::class, 'confirmPayment']);
+    Route::apiResource('brands', BrandController::class);
+    Route::apiResource('brand-types', BrandTypeController::class);
 
 });
 
