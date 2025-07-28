@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
@@ -85,20 +87,16 @@ class AuthController extends Controller
 
     $request->validate([
         'name'           => 'required|string|max:255',
-        'email'          => 'required|string|email|unique:users',
+        'email'          => 'required|string|email|unique:users' . $user->id,
         'phone_number'   => 'nullable|string|max:20',
         'gender'         => 'nullable|in:male,female',
         'date_of_birth'  => 'nullable|date',
         'image'          => 'nullable|url',
     ]);
 
-    $user->update([
-        'name'           => $request->name,
-        'email'          => $request->email,
-        'phone_number'   => $request->phone_number,
-        'gender'         => $request->gender,
-        'date_of_birth'  => $request->date_of_birth,
-    ]);
+    $user->update($request->only([
+        'name','email','phone_number','gender','date_of_birth','image'
+    ]));
 
     return response()->json([
         'status'  => true,
@@ -107,4 +105,71 @@ class AuthController extends Controller
     ]);
 }
 
+     // REQUEST OTP FORGOT PASSWORD
+    public function requestReset(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        $token = rand(100000, 999999);
+        $expiresAt = Carbon::now()->addMinutes(10);
+
+        DB::table('password_reset_tokens')->updateOrInsert(
+            ['email' => $request->email],
+            ['token' => $token, 'created_at' => now()]
+        );
+
+        // Kirim ke email (dummy / Mail::to()->send())
+        // Mail::to($request->email)->send(new SendOtpResetMail($token));
+
+        return response()->json(['message' => 'Kode OTP telah dikirim ke email.']);
+    }
+
+        // VERIFY OTP
+    public function verifyOtp(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'otp' => 'required|string',
+        ]);
+
+        $record = DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->where('token', $request->otp)
+            ->first();
+
+        if (!$record || Carbon::parse($record->created_at)->addMinutes(10)->isPast()) {
+            return response()->json(['message' => 'Kode OTP tidak valid atau sudah kadaluarsa.'], 422);
+        }
+
+        return response()->json(['message' => 'OTP valid.']);
+    }
+
+    // RESET PASSWORD
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'otp' => 'required',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        $record = DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->where('token', $request->otp)
+            ->first();
+
+        if (!$record || Carbon::parse($record->created_at)->addMinutes(10)->isPast()) {
+            return response()->json(['message' => 'OTP tidak valid atau sudah kadaluarsa.'], 422);
+        }
+
+        $user = User::where('email', $request->email)->first();
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+
+        return response()->json(['message' => 'Password berhasil direset.']);
+    }
 }

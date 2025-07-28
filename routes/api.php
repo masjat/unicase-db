@@ -15,6 +15,7 @@ use App\Http\Controllers\ShippingOptionController;
 use App\Http\Middleware\IsAdmin;
 use App\Http\Controllers\ProductImageController;
 use App\Http\Controllers\RajaOngkirController;
+use App\Http\Controllers\PaymentController;
 
 Route::get('/rajaongkir/provinces', [RajaOngkirController::class, 'provinces']);
 Route::get('/rajaongkir/cities', [RajaOngkirController::class, 'cities']); // ?province_id=5
@@ -24,6 +25,9 @@ Route::post('/rajaongkir/services', [RajaOngkirController::class, 'courierServic
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/request-reset', [AuthController::class, 'requestReset']);
+Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{id}', [ProductController::class, 'show']);
 Route::get('/products/{productId}/reviews', [ReviewController::class, 'index']);
@@ -44,6 +48,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/cart', [ShippingCartController::class, 'store']);
     Route::put('/cart/{id}', [ShippingCartController::class, 'update']);
     Route::delete('/cart/{id}', [ShippingCartController::class, 'destroy']);
+    Route::get('/payments', [PaymentController::class, 'index']);
+    Route::get('/payments/{id}', [PaymentController::class, 'show']);
+    Route::post('/payments', [PaymentController::class, 'store']);
+    Route::put('/payments/{id}', [PaymentController::class, 'update']);
+    Route::delete('/payments/{id}', [PaymentController::class, 'destroy']);
 
 
 });
@@ -55,6 +64,8 @@ Route::middleware(['auth:sanctum', IsAdmin::class])->group(function () {
     Route::post('/product-images', [ProductImageController::class, 'store']);
     Route::delete('/product-images/{id}', [ProductImageController::class, 'destroy']);
     Route::apiResource('payment-methods', PaymentMethodController::class);
+    Route::get('/payments', [PaymentController::class, 'index']);
+    Route::put('/payments/{id}/confirm', [PaymentController::class, 'confirmPayment']);
 
 });
 

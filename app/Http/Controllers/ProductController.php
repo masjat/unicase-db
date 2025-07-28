@@ -22,6 +22,9 @@ class ProductController extends Controller
             'color' => 'nullable|string',
             'category_id' => 'required|exists:categories,id',
             'weight' => 'required|integer',
+            'type' => 'required|in:ekslusif,custom',
+            'is_active' => 'boolean',
+            'user_id' => 'nullable|exists:users,id',
         ]);
 
         $product = Product::create($request->all());
@@ -30,14 +33,14 @@ class ProductController extends Controller
     }
 
     // show
-public function show($id)
+    public function show($id)
 {
     $product = Product::with('category', 'reviews')->findOrFail($id);
     return response()->json($product);
 }
 
     // update
-public function update(Request $request, $id)
+    public function update(Request $request, $id)
 {
     $product = Product::findOrFail($id);       
     $request->validate([
@@ -48,6 +51,9 @@ public function update(Request $request, $id)
         'color' => 'nullable|string',
         'category_id' => 'sometimes|exists:categories,id',
         'weight' => 'sometimes|integer',
+        'type' => 'sometimes|in:ekslusif,custom',
+        'is_active' => 'boolean',
+        'user_id' => 'nullable|exists:users,id',
     ]);
 
     $product->update($request->all());
