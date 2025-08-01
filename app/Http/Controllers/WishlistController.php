@@ -9,7 +9,12 @@ class WishlistController extends Controller
 {
     public function index()
     {
-        return Wishlist::with(['product','user'])->get();
+        $wishlists = Wishlist::with(['product'])->where('user_id', auth()->id())->get();
+
+        return response()->json([
+            'message' => 'Wishlist fetched successfully',
+            'data' => $wishlists,
+        ]);
     }
 
     public function store(Request $request)
@@ -17,6 +22,17 @@ class WishlistController extends Controller
         $validated = $request->validate([
             'product_id' => 'required|exists:products,id',
         ]);
+
+        // Cegah duplikasi
+        $exists = Wishlist::where('user_id', auth()->id())
+                    ->where('product_id', $validated['product_id'])
+                    ->exists();
+
+        if ($exists) {
+            return response()->json([
+                'message' => 'Product already in wishlist',
+            ], 409); // 409 Conflict
+        }
 
         $wishlist = Wishlist::create([
             'user_id' => auth()->id(),
@@ -31,25 +47,30 @@ class WishlistController extends Controller
 
     public function show($id)
     {
-       $wishlist = Wishlist::with(['product', 'user'])->findOrFail($id);
+        $wishlist = Wishlist::with(['product'])->findOrFail($id);
 
-        if (!$wishlist) {
-            return response()->json(['message' => 'Wishlist item not found'], 404);
+        if ($wishlist->user_id !== auth()->id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        return response()->json($wishlist);
+        return response()->json([
+            'message' => 'Wishlist item detail',
+            'data' => $wishlist,
+        ]);
     }
 
     public function destroy($id)
     {
         $wishlist = Wishlist::findOrFail($id);
-        $productId = $wishlist->product_id;
-        $wishlist->delete();
-    
-        if (auth()->id() !== $wishlist->user_id) {
+
+        if ($wishlist->user_id !== auth()->id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        return response()->json(['message' => 'Wishlist item deleted']);
+        $wishlist->delete();
+
+        return response()->json([
+            'message' => 'Wishlist item deleted',
+        ]);
     }
 }

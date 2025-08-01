@@ -35,7 +35,6 @@ Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{id}', [ProductController::class, 'show']);
 Route::get('/products/{productId}/reviews', [ReviewController::class, 'index']);
 Route::post('/ordertracking', [OrderTrackingController::class, 'store']);
-Route::apiResource('shipping-options', ShippingOptionController::class);
 
 
 
@@ -57,6 +56,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/payments/{id}', [PaymentController::class, 'update']);
     Route::delete('/payments/{id}', [PaymentController::class, 'destroy']);
     Route::apiResource('custom-cases', CustomCaseController::class);
+    Route::apiResource('wishlist', WishlistController::class);
 
 
 });
